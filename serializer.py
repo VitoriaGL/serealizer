@@ -92,6 +92,23 @@ class JSONSerializer(Serializer):
         return json.loads(data)
 
     @staticmethod
+    def is_valid_json(data: str) -> bool:
+        """
+        Verifica se uma string é um JSON válido.
+
+        Args:
+            data: String a ser verificada
+
+        Returns:
+            True se a string for um JSON válido, False caso contrário
+        """
+        try:
+            json.loads(data)
+            return True
+        except (json.JSONDecodeError, TypeError):
+            return False
+
+    @staticmethod
     def _default_serializer(obj: Any) -> Any:
         """
         Função auxiliar para serializar tipos especiais.
