@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "serealizer"
+version = "0.1.0"
+description = "Um serializer Python para converter objetos em diferentes formatos"
+authors = ["Seu Nome <seu.email@example.com>"]
+readme = "README.md"
+packages = [{include = "serealizer"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+black = "^23.7.0"
+flake8 = "^6.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
