@@ -4,24 +4,32 @@ ViewSets para expor os serializers através de uma API REST.
 
 import json
 from flask import Flask, request, jsonify
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from .serializer import JSONSerializer, DictSerializer
+from .pagination import PageNumberPagination, LimitOffsetPagination
 
 
 class JSONSerializerViewSet:
     """ViewSet para operações com JSONSerializer."""
 
-    def __init__(self, app: Optional[Flask] = None, url_prefix: str = "/api/json"):
+    def __init__(
+        self,
+        app: Optional[Flask] = None,
+        url_prefix: str = "/api/json",
+        pagination_class: Optional[type] = PageNumberPagination,
+    ):
         """
         Inicializa o ViewSet.
 
         Args:
             app: Instância da aplicação Flask
             url_prefix: Prefixo da URL para os endpoints
+            pagination_class: Classe de paginação a ser usada (None para desabilitar)
         """
         self.app = app
         self.url_prefix = url_prefix
         self.serializer = JSONSerializer(indent=2)
+        self.pagination_class = pagination_class
         if app:
             self.register_routes()
 
@@ -75,6 +83,39 @@ class JSONSerializerViewSet:
                 json_string = data["json_string"]
                 is_valid = self.serializer.is_valid_json(json_string)
                 return jsonify({"is_valid": is_valid}), 200
+            except Exception as e:
+                return jsonify({"error": f"Erro inesperado: {str(e)}"}), 500
+
+        @self.app.route(f"{self.url_prefix}/list", methods=["GET", "POST"])
+        def list_items():
+            """
+            Endpoint de exemplo que retorna uma lista paginada.
+            Demonstra como usar a paginação estilo DRF.
+            
+            GET: Retorna lista paginada de exemplo
+            POST: Aceita uma lista no body e retorna paginada
+            """
+            try:
+                # Exemplo: lista de dados (em produção viria de um banco de dados)
+                if request.method == "POST":
+                    data = request.get_json()
+                    if data is None or "items" not in data:
+                        return jsonify({"error": "Campo 'items' não fornecido"}), 400
+                    items = data["items"]
+                else:
+                    # Lista de exemplo para demonstração
+                    items = [{"id": i, "nome": f"Item {i}", "valor": i * 10} for i in range(1, 101)]
+
+                # Aplicar paginação se configurada
+                if self.pagination_class:
+                    paginator = self.pagination_class()
+                    paginated_items = paginator.paginate_queryset(items, request)
+                    response_data = paginator.get_paginated_response_schema(
+                        paginated_items, len(items), request
+                    )
+                    return jsonify(response_data), 200
+                else:
+                    return jsonify({"results": items, "count": len(items)}), 200
             except Exception as e:
                 return jsonify({"error": f"Erro inesperado: {str(e)}"}), 500
 
