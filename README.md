@@ -55,10 +55,16 @@ print(dict_result)
 
 ## Executando os Testes
 
-Para executar os testes unitários:
+Para executar todos os testes unitários (serializers + viewsets):
 
 ```bash
 poetry run pytest
+```
+
+Ou usando pytest diretamente:
+
+```bash
+python -m pytest tests/ -v
 ```
 
 Para executar com cobertura:
@@ -67,16 +73,77 @@ Para executar com cobertura:
 poetry run pytest --cov=serealizer --cov-report=html
 ```
 
+**Status dos Testes:**
+- ✅ 35 testes para serializers
+- ✅ 24 testes para viewsets
+- ✅ **Total: 59 testes passando**
+
+## API REST (ViewSets)
+
+O projeto inclui ViewSets baseados em Flask para expor os serializers através de uma API REST.
+
+### Executando a API
+
+```bash
+python app.py
+```
+
+A API estará disponível em `http://localhost:5000`
+
+### Endpoints Disponíveis
+
+#### JSONSerializerViewSet
+
+- `POST /api/json/serialize` - Serializa dados para JSON
+  ```bash
+  curl -X POST http://localhost:5000/api/json/serialize \
+    -H "Content-Type: application/json" \
+    -d '{"nome": "João", "idade": 30}'
+  ```
+
+- `POST /api/json/deserialize` - Deserializa JSON para objeto Python
+  ```bash
+  curl -X POST http://localhost:5000/api/json/deserialize \
+    -H "Content-Type: application/json" \
+    -d '{"json_string": "{\"nome\": \"Maria\", \"idade\": 25}"}'
+  ```
+
+- `POST /api/json/validate` - Valida se uma string é JSON válido
+  ```bash
+  curl -X POST http://localhost:5000/api/json/validate \
+    -H "Content-Type: application/json" \
+    -d '{"json_string": "{\"nome\": \"João\"}"}'
+  ```
+
+#### DictSerializerViewSet
+
+- `POST /api/dict/to_dict` - Converte objeto para dicionário
+  ```bash
+  curl -X POST http://localhost:5000/api/dict/to_dict \
+    -H "Content-Type: application/json" \
+    -d '{"data": {"nome": "João", "idade": 30}}'
+  ```
+
+#### Health Check
+
+- `GET /health` - Verifica se a API está funcionando
+  ```bash
+  curl http://localhost:5000/health
+  ```
+
 ## Estrutura do Projeto
 
 ```
 serealizer/
 ├── serealizer/
 │   ├── __init__.py
-│   └── serializer.py
+│   ├── serializer.py
+│   └── viewsets.py
 ├── tests/
 │   ├── __init__.py
-│   └── test_serializer.py
+│   ├── test_serializer.py
+│   └── test_viewsets.py
+├── app.py
 ├── pyproject.toml
 └── README.md
 ```
@@ -87,6 +154,8 @@ serealizer/
 - Suporte para tipos especiais (datetime, Decimal, set)
 - Conversão de objetos Python para dicionários
 - Serialização de objetos customizados
+- **API REST com ViewSets baseados em Flask**
+- **Testes unitários completos para serializers e viewsets**
 
 ## Desenvolvimento
 
